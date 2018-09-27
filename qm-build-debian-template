@@ -1,0 +1,158 @@
+#!/bin/sh
+#
+# Build a Debian image from scratch and generate a Proxmox VM template.
+#
+# License: MIT
+# Repo / Bug Tracker: https://github.com/znerol/qm-build-debian-template
+#
+# See also:
+# * man build-openstack-debian-image
+# * https://pve.proxmox.com/pve-docs/pve-admin-guide.html#qm_cloud_init
+
+# Parse input parameters
+usage() {
+	echo "Usage: $0 [options]
+Options are:
+ --release|-r <buster|stretch|jessie|wheezy> (default: stretch)
+ --vmid|-i (default: 9000)
+ --vmname|-n (default: generated)
+ --vmstorage|-s (default: lvm-local)
+
+Additional options are passed to build-openstack-debian-image"
+	exit 1
+}
+
+# Check for openstack image script.
+if [ ! -e /usr/sbin/build-openstack-debian-image ]; then
+	echo "Error: Openstack image script not found"
+	echo "Please install the missing package:"
+	echo
+	echo "	apt install openstack-debian-images"
+	echo
+	exit 1
+fi
+
+# Check for qm
+if [ ! -e /usr/sbin/qm ]; then
+	echo "Error: Qemu/KVM Virtual Machine Manager not found"
+	echo
+	echo "	This script is expected to be run on a Proxmox VE host."
+	echo
+	exit 1
+fi
+
+VMID=9000
+RELEASE="stretch"
+VMSTORAGE="local-lvm"
+
+for i in "$@" ; do
+	case "${1}" in
+	"--vmid"|"-i")
+		if [ -z "${2}" ] ; then
+			echo "No parameter defining VM id"
+			usage
+		fi
+		VMID=${2}
+		shift
+		shift
+	;;
+	"--vmname"|"-s")
+		if [ -z "${2}" ] ; then
+			echo "No parameter defining VM name"
+			usage
+		fi
+		VMNAME=${2}
+		shift
+		shift
+	;;
+	"--vmstorage"|"-s")
+		if [ -z "${2}" ] ; then
+			echo "No parameter defining VM storage"
+			usage
+		fi
+		VMSTORAGE=${2}
+		shift
+		shift
+	;;
+	"--release"|"-r")
+		if [ "${2}" = "wheezy" ] || [ "${2}" = "jessie" ] || [ "${2}" = "stretch" ] || [ "${2}" = "buster" ] ; then
+			RELEASE=${2}
+			shift
+			shift
+		else
+			echo "Release not recognized."
+			usage
+		fi
+	;;
+	"--extra-packages"|"-e")
+	;;
+	"--debootstrap-url"|"-u")
+	;;
+	"--minimal"|"-m")
+	;;
+	"--azure"|"-az")
+	;;
+	"--boot-manager"|"-bm")
+	;;
+	"--boot-type"|"-bt")
+	;;
+	"--architecture"|"-a")
+	;;
+	"--automatic-resize"|"-ar")
+	;;
+	"--automatic-resize-space"|"-ars")
+	;;
+	"--image-size"|"-is")
+	;;
+	"--hook-script"|"-hs")
+	;;
+	"--sources.list-mirror"|"-s")
+	;;
+	"--login"|"-l")
+	;;
+	"--password"|"-p")
+	;;
+	*)
+		usage
+	;;
+	esac
+done
+
+VMNAME=${VMNAME:-"debian-${RELEASE}-$(TZ=UTC date '+%Y%m%d%H%M')"}
+OUTPUT=${OUTPUT:-"$(/bin/mktemp --tmpdir qm-build-debian-template.XXXXXXXXXX)"}
+
+function cleanup {
+	/bin/rm -f "${OUTPUT}" "${OUTPUT}.raw" "${OUTPUT}.qcow2"
+}
+trap cleanup EXIT
+
+set -ex
+
+# Create a new VM.
+# * Add Cloud-Init CDROM drive.
+# * Configure a serial console and use it as a display.
+/usr/sbin/qm create "${VMID}" \
+	--name "${VMNAME}" \
+	--cdrom "${VMSTORAGE}:cloudinit" \
+	--serial0 socket --vga serial0 \
+	--scsihw virtio-scsi-pci \
+	--agent 1 \
+	--ostype l26
+
+# Build the base image.
+/usr/sbin/build-openstack-debian-image \
+	--release "${RELEASE}" \
+	"$@" \
+	--output "${OUTPUT}" \
+
+# Import the created disk to local-lvm storage.
+/usr/sbin/qm importdisk "${VMID}" "${OUTPUT}.qcow2" "${VMSTORAGE}"
+
+# Attach the new disk to the VM as scsi drive with discard enabled.
+/usr/sbin/qm set "${VMID}" --scsi0 "${VMSTORAGE}:vm-${VMID}-disk-0,discard=on"
+
+# Set boot disk.
+/usr/sbin/qm set "${VMID}" --boot c --bootdisk scsi0
+
+# Turn vm into a template.
+/usr/sbin/qm template "${VMID}"
