@@ -121,7 +121,7 @@ done
 VMNAME=${VMNAME:-"debian-${RELEASE}-$(TZ=UTC date '+%Y%m%d%H%M')"}
 OUTPUT=${OUTPUT:-"$(/bin/mktemp --tmpdir qm-build-debian-template.XXXXXXXXXX)"}
 
-function cleanup {
+cleanup() {
 	/bin/rm -f "${OUTPUT}" "${OUTPUT}.raw" "${OUTPUT}.qcow2"
 }
 trap cleanup EXIT
