@@ -15,9 +15,9 @@ qm-build-debian-template --release buster \
 
 ## See also
 
-* man build-openstack-debian-image
-* https://pve.proxmox.com/pve-docs/pve-admin-guide.html#qm_cloud_init
+* [man build-openstack-debian-image](http://manpages.ubuntu.com/manpages/xenial/man1/build-openstack-debian-image.1.html)
+* [PVE Admin Guide / Cloud Init](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#qm_cloud_init)
 
 ## License
 
-Released under the MIT License
+Released under the [MIT License](https://opensource.org/licenses/MIT)
