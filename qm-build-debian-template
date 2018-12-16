@@ -134,6 +134,7 @@ set -ex
 /usr/sbin/qm create "${VMID}" \
 	--name "${VMNAME}" \
 	--cdrom "${VMSTORAGE}:cloudinit" \
+	--net0 virtio,bridge=vmbr0 \
 	--serial0 socket --vga serial0 \
 	--scsihw virtio-scsi-pci \
 	--agent 1 \
@@ -146,10 +147,10 @@ set -ex
 	--output "${OUTPUT}" \
 
 # Import the created disk to local-lvm storage.
-/usr/sbin/qm importdisk "${VMID}" "${OUTPUT}.qcow2" "${VMSTORAGE}"
+/usr/sbin/qm importdisk "${VMID}" "${OUTPUT}.qcow2" "${VMSTORAGE}" --format qcow2
 
 # Attach the new disk to the VM as scsi drive with discard enabled.
-/usr/sbin/qm set "${VMID}" --scsi0 "${VMSTORAGE}:vm-${VMID}-disk-0,discard=on"
+/usr/sbin/qm set "${VMID}" --scsi0 "${VMSTORAGE}:${VMID}/vm-${VMID}-disk-0.qcow2,discard=on"
 
 # Set boot disk.
 /usr/sbin/qm set "${VMID}" --boot c --bootdisk scsi0
