@@ -56,7 +56,7 @@ for i in "$@" ; do
 		shift
 		shift
 	;;
-	"--vmname"|"-s")
+	"--vmname"|"-n")
 		if [ -z "${2}" ] ; then
 			echo "No parameter defining VM name"
 			usage
