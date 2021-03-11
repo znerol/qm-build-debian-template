@@ -112,6 +112,34 @@ for i in "$@" ; do
 	;;
 	"--password"|"-p")
 	;;
+	"--root-ssh-key")
+        ;;
+	"--no-remove-host-keys")
+        ;;
+	"--permit-ssh-as-root")
+        ;;
+	"--hostname")
+        ;;
+	"--static-iface")
+        ;;
+	"--reboot-after-install")
+        ;;
+	"--install-nonfree-repo")
+        ;;
+	"--postinstall-packages")
+        ;;
+	"--security-mirror")
+        ;;
+	"--pre-reboot-hook")
+        ;;
+	"--add-serial-getty")
+        ;;
+	"--xfsformat")
+        ;;
+	"--vgcreate")
+        ;;
+	"--no-cloud-kernel")
+        ;;
 	*)
 		usage
 	;;
