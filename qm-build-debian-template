@@ -75,7 +75,7 @@ for i in "$@" ; do
 		shift
 	;;
 	"--release"|"-r")
-		if [ "${2}" = "wheezy" ] || [ "${2}" = "jessie" ] || [ "${2}" = "stretch" ] || [ "${2}" = "buster" ] || [ "${2}" = "bullseye" ] || [ "${2}" = "booksworm" ] || [ "${2}" = "sid" ] ; then
+		if [ "${2}" = "wheezy" ] || [ "${2}" = "jessie" ] || [ "${2}" = "stretch" ] || [ "${2}" = "buster" ] || [ "${2}" = "bullseye" ] || [ "${2}" = "bookworm" ] || [ "${2}" = "sid" ] ; then
 			RELEASE=${2}
 			shift
 			shift
