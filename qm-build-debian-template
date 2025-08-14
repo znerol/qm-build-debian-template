@@ -13,7 +13,7 @@
 usage() {
 	echo "Usage: $0 [options]
 Options are:
- --release|-r <sid|bookworm|bullseye|buster|stretch|jessie|wheezy> (default: buster)
+ --release|-r <sid|forky|trixie|bookworm|bullseye|buster|stretch|jessie|wheezy> (default: trixie)
  --vmid|-i (default: 9000)
  --vmname|-n (default: generated)
  --vmstorage|-s (default: lvm-local)
@@ -42,7 +42,7 @@ if [ ! -e /usr/sbin/qm ]; then
 fi
 
 VMID=9000
-RELEASE="buster"
+RELEASE="trixie"
 VMSTORAGE="local-lvm"
 
 for i in "$@" ; do
@@ -75,7 +75,7 @@ for i in "$@" ; do
 		shift
 	;;
 	"--release"|"-r")
-		if [ "${2}" = "wheezy" ] || [ "${2}" = "jessie" ] || [ "${2}" = "stretch" ] || [ "${2}" = "buster" ] || [ "${2}" = "bullseye" ] || [ "${2}" = "bookworm" ] || [ "${2}" = "sid" ] ; then
+		if [ "${2}" = "wheezy" ] || [ "${2}" = "jessie" ] || [ "${2}" = "stretch" ] || [ "${2}" = "buster" ] || [ "${2}" = "bullseye" ] || [ "${2}" = "bookworm" ] || [ "${2}" = "trixie" ] || [ "${2}" = "forky" ] || [ "${2}" = "sid" ] ; then
 			RELEASE=${2}
 			shift
 			shift
